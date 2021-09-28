@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Button,
   Image,
@@ -10,20 +10,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { data } from './const';
+import {data} from './const';
 
 export default function Timer() {
   const [minutes, setMinutes] = useState(70);
   const [seconds, setSeconds] = useState(0);
+  const [정답확인, set정답확인] = useState(0);
   const [input, setInput] = useState('');
-  const [textArea, setTextArea] = useState('');
-  const [image, setImage] = useState('');
-  // const [정답맞춤, set정답맞춤] = useState(false)
+  const [display, setDisplay] = useState('');
   const [state, setState] = useState({
-    input : '',
-    image : '',
-    correct : false
-  })
+    input: '',
+    image: '',
+    correct: false,
+  });
+  const inputRef = useRef();
   useEffect(() => {
     const countdown = setInterval(() => {
       if (seconds > 0) {
@@ -42,52 +42,90 @@ export default function Timer() {
     return () => clearInterval(countdown);
   }, [minutes, seconds]);
 
-  
-  
   const onPress = () => {
-    data[input] && setState({
-      text : data[input],
-      correct : true,
-    })
+    if (data[input] === undefined) {
+      setInput('');
+      return;
+    }
+    if (data[input].힌트 === 'admin') {
+      setMinutes(70);
+      setSeconds(0);
+      set정답확인(0);
+      setInput('');
+    } else {
+      setState({
+        text: data[input].힌트,
+        correct: true,
+        image: data[input].이미지,
+      });
+    }
   };
 
   return (
-    <View className="Timer" style={{flex : 1,alignItems : 'center'}}>
-
-      <View style={{flex : 3, justifyContent : 'center', alignItems : 'center', width : '86%'}}>
-        
+    <View className="Timer" style={{flex: 1, alignItems: 'center'}}>
+      <View
+        style={{
+          flex: 3,
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '86%',
+        }}>
+        <Text style={{fontSize: 15, marginBottom: -30}}>
+          정답 사용 횟수: {정답확인}
+        </Text>
         <Text style={styles.timerText}>
           {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
         </Text>
-        
-        <ScrollView>
-          <Image source = {require('./aa.png')} />
+
+        <ScrollView style={{width: '100%'}}>
+          {state.image !== '' && ( //
+            <Image source={state.image} />
+          )}
           <Text style={styles.textArea}>{state.text}</Text>
         </ScrollView>
       </View>
 
-
-      
-      {
-        state.correct 
-        ? 
-        <View style={{flexDirection : 'row'}}>
-          <TouchableOpacity onPress={()=> {setState({text : '병신 ㅋㅋ', correct : true})}}>
-            <Text style={{fontSize : 30, paddingRight : 15, paddingLeft: 15, borderRadius : 10, margin : 15, backgroundColor : '#C4C4C4'}}>정답</Text>
+      {state.correct ? (
+        <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity
+            onPress={e => {
+              setState({
+                text: data[input].정답,
+                correct: true,
+                image: data[input].이미지,
+              });
+              setDisplay('display');
+              set정답확인(정답확인 + 1);
+            }}>
+            <Text ref={inputRef} style={styles['정답버튼' + display]}>
+              정답
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={()=>{
-            setState({
-              text : '',
-              correct : false,
-
-            })
-          }}>
-            <Text style={{fontSize : 30, paddingRight : 15, paddingLeft: 15, borderRadius : 10, margin : 15, backgroundColor : '#C4C4C4'}}>뒤로가기</Text>
+          <TouchableOpacity
+            onPress={() => {
+              setState({
+                text: '',
+                correct: false,
+              });
+              setDisplay('');
+              setInput('');
+            }}>
+            <Text
+              style={{
+                fontSize: 30,
+                paddingRight: 15,
+                paddingLeft: 15,
+                borderRadius: 10,
+                margin: 15,
+                backgroundColor: '#C4C4C4',
+              }}>
+              뒤로가기
+            </Text>
           </TouchableOpacity>
         </View>
-        : 
-        <View style={styles.bottomView}>  
+      ) : (
+        <View style={styles.bottomView}>
           <TextInput
             value={input}
             style={[styles.textInput]}
@@ -95,19 +133,11 @@ export default function Timer() {
               setInput(text);
             }}
           />
-          <TouchableOpacity 
-            onPress={onPress}
-            style={[styles.button]}
-          >
-            <Text style={{fontSize :20}}>HINT</Text>
+          <TouchableOpacity onPress={onPress} style={[styles.button]}>
+            <Text style={{fontSize: 20}}>HINT</Text>
           </TouchableOpacity>
         </View>
-        
-      }
-      
-
-
-
+      )}
     </View>
   );
 }
@@ -124,36 +154,52 @@ const styles = StyleSheet.create({
   },
 
   bottomView: {
-    flex : 1,
-    flexDirection : 'row',
-    marginBottom : 15,
-    marginRight : 15,
-    marginLeft : 15,
-    alignItems : 'flex-end'
+    flex: 1,
+    flexDirection: 'row',
+    marginBottom: 15,
+    marginRight: 15,
+    marginLeft: 15,
+    alignItems: 'flex-end',
   },
 
   textInput: {
-    flex : 3,
-    marginRight : 15,
+    flex: 3,
+    marginRight: 15,
     borderRadius: 10,
     borderColor: 'gray',
     borderWidth: 1,
-    height : 40
+    height: 40,
   },
 
-  button :{
-    flex : 1,
-    height : 40,
-    backgroundColor : '#C4C4C4',
-    borderRadius : 10,
-    alignItems : 'center',
-    justifyContent : 'center',
-    elevation : 1,
+  button: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#C4C4C4',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 1,
   },
   textArea: {
-    fontSize : 20,
+    fontSize: 20,
     margin: 10,
-    width: '80%',
-
+    width: '95%',
+  },
+  정답버튼: {
+    fontSize: 30,
+    paddingRight: 15,
+    paddingLeft: 15,
+    borderRadius: 10,
+    margin: 15,
+    backgroundColor: '#C4C4C4',
+  },
+  정답버튼display: {
+    fontSize: 30,
+    paddingRight: 15,
+    paddingLeft: 15,
+    borderRadius: 10,
+    margin: 15,
+    backgroundColor: '#C4C4C4',
+    display: 'none',
   },
 });
