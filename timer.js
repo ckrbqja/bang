@@ -1,23 +1,26 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {
-  Button,
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  Touchable,
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import AsyncStorage from '@react-native-community/async-storage';
 import {data} from './const';
 
 export default function Timer() {
-  const [minutes, setMinutes] = useState(70);
+  const [minutes, setMinutes] = useState(data.timer);
   const [seconds, setSeconds] = useState(0);
   const [정답확인, set정답확인] = useState(0);
   const [input, setInput] = useState('');
   const [display, setDisplay] = useState('');
+  const [stopTime, setStopTime] = useState(true);
+  const [buttonName, setButtonName] = useState('START');
   const [state, setState] = useState({
     input: '',
     image: '',
@@ -25,33 +28,70 @@ export default function Timer() {
   });
   const inputRef = useRef();
   useEffect(() => {
-    const countdown = setInterval(() => {
-      if (seconds > 0) {
-        setSeconds(seconds - 1);
-      }
-
-      if (seconds === 0) {
-        if (minutes === 0) {
-          clearInterval(countdown);
+    const countdown = setInterval(async () => {
+      let date;
+      await AsyncStorage.getItem('sc', (e, r) => (date = r));
+      if (date !== null) {
+        date = new Date(date);
+        const realNow = new Date();
+        let sSe = Math.round((realNow - date) / 1000);
+        let sMn = Math.ceil(sSe / 60);
+        sSe = Math.round(sSe % 60);
+        if (sMn === 0 && sSe === 0) {
+          setSeconds(0);
+        }
+        if (data.timer - sMn < 0) {
+          setMinutes(0);
+          setSeconds(0);
         } else {
-          setMinutes(minutes - 1);
-          setSeconds(59);
+          setMinutes(data.timer - sMn);
+          setSeconds(60 - sSe === 60 ? 0 : 60 - sSe);
         }
       }
-    }, 1000);
+    }, 0);
+    stopTime && clearInterval(countdown);
     return () => clearInterval(countdown);
-  }, [minutes, seconds]);
+  }, [minutes, seconds, stopTime]);
 
-  const onPress = () => {
+  useEffect(async () => {
+    let date;
+    await AsyncStorage.getItem('sc', (e, r) => (date = r));
+    if (date !== null) {
+      date = new Date(date);
+      const realNow = new Date();
+      let sSe = Math.round((realNow - date) / 1000);
+      let sMn = Math.ceil(sSe / 60);
+      sSe = Math.round(sSe % 60);
+      if (minutes - sMn < 0) {
+        setMinutes(0);
+        setSeconds(0);
+      } else {
+        setMinutes(minutes - sMn);
+        setSeconds(60 - sSe);
+      }
+      setStopTime(false);
+      setButtonName('HINT');
+    }
+  }, []);
+
+  const onPress = async () => {
+    if (buttonName === 'START') {
+      await AsyncStorage.setItem('sc', await new Date().toString());
+    }
+    stopTime && (setStopTime(false), setButtonName('HINT'));
     if (data[input] === undefined) {
       setInput('');
+
       return;
     }
     if (data[input].힌트 === 'admin') {
-      setMinutes(70);
-      setSeconds(0);
-      set정답확인(0);
+      input === 'btc' && set정답확인(0);
       setInput('');
+      setStopTime(true);
+      setButtonName('START');
+      await AsyncStorage.setItem('sc', '');
+      await setMinutes(data.timer);
+      await setSeconds(0);
     } else {
       setState({
         text: data[input].힌트,
@@ -73,7 +113,7 @@ export default function Timer() {
         <Text style={{fontSize: 15, marginBottom: -30}}>
           정답 사용 횟수: {정답확인}
         </Text>
-        <Text style={styles.timerText}>
+        <Text style={{...styles.timerText, top: state.correct ? 0 : '50%'}}>
           {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
         </Text>
 
@@ -92,7 +132,7 @@ export default function Timer() {
               setState({
                 text: data[input].정답,
                 correct: true,
-                image: data[input].이미지,
+                image: data[input].답이미지,
               });
               setDisplay('display');
               set정답확인(정답확인 + 1);
@@ -134,7 +174,7 @@ export default function Timer() {
             }}
           />
           <TouchableOpacity onPress={onPress} style={[styles.button]}>
-            <Text style={{fontSize: 20}}>HINT</Text>
+            <Text style={{fontSize: 20}}>{buttonName}</Text>
           </TouchableOpacity>
         </View>
       )}

@@ -10,6 +10,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-community/async-storage": "1.12.1",
+    "i": "0.3.7",
+    "npm": "7.24.1",
     "react": "17.0.2",
     "react-native": "0.65.1"
   },

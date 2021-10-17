@@ -1,8 +1,15 @@
 export const data = {
-  181819: {
+  timer: 70,
+
+  btc: {
     힌트: 'admin',
   },
-  aa: {
+
+  start: {
+    힌트: 'admin',
+  },
+
+  ss: {
     힌트: `Firebase는 열렬히 React를 지지합니다. Firebase로 애플리케이션 상태를 동기화하고, React로 상태 변경을 바탕으로 애플리케이션 UI를 다시 그립니다. 아주 이상적인 조합이죠.
 그리고 React Native를 사용하면서 JavaScript 개발자들의 앱 개발이 한결 더 쉬워졌습니다. React Native를 사용하면 JavaScript만으로 진정한 네이티브 앱을 빌드할 수 있습니다. 정말 대단하지 않나요? 우리는 미래에 살고 있습니다. 그럼 시작해봅시다.
 설정
@@ -11,6 +18,7 @@ export const data = {
 이 도구들이 설치되고 나면 다음 명령을 실행하세요`,
     정답: 'ㅎㅇ',
     이미지: require('./images/aa.png'),
+    답이미지: require('./images/bb.png'),
   },
 
   bb: {
@@ -19,5 +27,15 @@ export const data = {
     fsafsafsdafs`,
     정답: 'ss',
     이미지: require('./images/bb.png'),
+    답이미지: require('./images/bb.png'),
+  },
+
+  cc: {
+    힌트: `dfsfdsfsdfsdfsa
+    fsdfas
+    fsafsafsdafs`,
+    정답: 'ss',
+    이미지: '',
+    답이미지: require('./images/bb.png'),
   },
 };
