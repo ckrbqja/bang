@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable prettier/prettier */
 import React, {useState, useEffect, useRef} from 'react';
 import {
   Alert,
@@ -119,7 +121,11 @@ export default function Timer() {
 
         <ScrollView style={{width: '100%'}}>
           {state.image !== '' && ( //
-            <Image source={state.image} />
+            <Image source={state.image} style={{
+              left:-47,
+              width: 400,
+              height: 350,
+              resizeMode: 'contain'}}/>
           )}
           <Text style={styles.textArea}>{state.text}</Text>
         </ScrollView>
